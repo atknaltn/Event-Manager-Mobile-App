@@ -17,7 +17,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     Dashboard(title: 'Dashboard'),
     SearchPage(title: 'Search'),
     ChartsPage(title: 'Charts'),
-    NodesPage(title: 'Nodes')
+    NodesPage(title: 'Devices')
   ];
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
                 backgroundColor: Colors.blue),
             BottomNavigationBarItem(
                 icon: Icon(Icons.data_object_sharp),
-                label: 'Nodes',
+                label: 'Devices',
                 backgroundColor: Colors.blue)
           ],
           onTap: (index) {

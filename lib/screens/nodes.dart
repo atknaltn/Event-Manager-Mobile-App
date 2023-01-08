@@ -44,42 +44,42 @@ class _NodesPageState extends State<NodesPage> {
                           children: <Widget>[
                             TextFormField(
                               controller: nodeNameController,
-                              decoration: InputDecoration(
-                                labelText: 'Node Name',
+                              decoration: const InputDecoration(
+                                labelText: 'Device Name',
                                 icon: Icon(Icons.abc),
                               ),
                             ),
                             TextFormField(
                               controller: nodeCategoryController,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Category',
                                 icon: Icon(Icons.category),
                               ),
                             ),
                             TextFormField(
                               controller: nodeSubcategoryController,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'Subcategory',
                                 icon: Icon(Icons.category_outlined),
                               ),
                             ),
                             TextFormField(
                               controller: nodeIPController,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'IP Address',
                                 icon: Icon(Icons.numbers),
                               ),
                             ),
                             TextFormField(
                               controller: nodeDNSController,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'DNS',
                                 icon: Icon(Icons.numbers_outlined),
                               ),
                             ),
                             TextFormField(
                               controller: nodeMACController,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 labelText: 'MAC Address',
                                 icon: Icon(Icons.tablet_mac),
                               ),
@@ -122,7 +122,7 @@ class _NodesPageState extends State<NodesPage> {
                 },
               );
             },
-          )
+          ),
         ],
       ),
       body: FutureBuilder(
@@ -181,7 +181,7 @@ class _NodesPageState extends State<NodesPage> {
   Widget displayCard(NodeModel data) {
     return ExpansionTile(
         title: Text(data.nodeName),
-        trailing: const Image(image: AssetImage('assets/shield_worsening.png')),
+        trailing: const Image(image: AssetImage('assets/shield_healthy.png')),
         //leading: const Icon(Icons.keyboard_arrow_right_outlined),
         controlAffinity: ListTileControlAffinity.leading,
         collapsedIconColor: Colors.red,
@@ -192,31 +192,31 @@ class _NodesPageState extends State<NodesPage> {
             child: Column(
               children: [
                 Text("${data.nodeId}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text("${data.nodeName}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text("${data.ip}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text("${data.dns}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text("${data.macAddress}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text("${data.category}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text("${data.subcategory}"),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
               ],
