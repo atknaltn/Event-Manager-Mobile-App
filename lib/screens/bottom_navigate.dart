@@ -1,4 +1,5 @@
 import 'package:event_manager/screens/charts.dart';
+import 'package:event_manager/screens/correlation.dart';
 import 'package:event_manager/screens/dashboard.dart';
 import 'package:event_manager/screens/nodes.dart';
 import 'package:event_manager/screens/search.dart';
@@ -17,7 +18,8 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     Dashboard(title: 'Dashboard'),
     SearchPage(title: 'Search'),
     ChartsPage(title: 'Charts'),
-    NodesPage(title: 'Devices')
+    NodesPage(title: 'Devices'),
+    CorrelationRuleScreen()
   ];
   @override
   Widget build(BuildContext context) {
@@ -42,9 +44,14 @@ class _BottomNavigatorState extends State<BottomNavigator> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.data_object_sharp),
                 label: 'Devices',
-                backgroundColor: Colors.blue)
+                backgroundColor: Colors.blue),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.search),
+                label: 'Correlation',
+                backgroundColor: Colors.blue),
           ],
           onTap: (index) {
+            print(index);
             setState(() {
               _currIndex = index;
             });
