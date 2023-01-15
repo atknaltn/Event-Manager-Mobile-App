@@ -22,7 +22,7 @@ class ChartsPage extends StatefulWidget {
 class _ChartsPageState extends State<ChartsPage> {
   String selectedNodePie = "";
   String selectedNodeBar = "";
-  String dropdownValue = '101.169.213';
+  String dropdownValue = '10.15.1.1';
   bool isDeviceChanged = false;
   Map<String, double> dataMap = {};
   List<String> list = <String>[
@@ -47,7 +47,10 @@ class _ChartsPageState extends State<ChartsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text('Select Device: '),
+                const Text(
+                  'Device: ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 SizedBox(width: 8),
                 FutureBuilder(
                   future: MongoDatabase.getNodeData(),
@@ -56,14 +59,14 @@ class _ChartsPageState extends State<ChartsPage> {
                     if (snapshot.hasData) {
                       return DropdownButton<String>(
                         value: dropdownValue,
-                        icon: const Icon(Icons.arrow_downward),
                         iconSize: 24,
                         elevation: 16,
-                        style: const TextStyle(color: Colors.deepPurple),
-                        underline: Container(
-                          height: 2,
-                          color: Colors.deepPurpleAccent,
-                        ),
+                        iconEnabledColor: Colors.white,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
+                        dropdownColor: Colors.blueGrey,
                         onChanged: (String? newValue) {
                           setState(() {
                             dropdownValue = newValue!;

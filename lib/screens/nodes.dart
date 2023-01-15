@@ -307,8 +307,8 @@ class _NodesPageState extends State<NodesPage> {
         logs.where((log) => log['Ip'] == selectedDeviceIp).toList();
     num totalLogs = selectedDeviceLogs.length;
     print("SAAAAAAAAA" + totalLogs.toString());
-    final num unhealthyThreshold = (totalLogs * 0.1);
-    final num stableThreshold = (totalLogs * 0.05);
+    final num unhealthyThreshold = (totalLogs * 0.9);
+    final num stableThreshold = (totalLogs * 0.005);
     num totalWeight = 0;
     for (final log in selectedDeviceLogs) {
       final severity = log["Severity"];

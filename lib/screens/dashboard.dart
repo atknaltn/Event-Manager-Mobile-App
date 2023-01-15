@@ -16,7 +16,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  String dropdownValue = '101.169.213';
+  String dropdownValue = '10.15.1.1';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +29,7 @@ class _DashboardState extends State<Dashboard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Text(
-                  'Select Device: ',
+                  'Device: ',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 8),
@@ -103,10 +103,18 @@ class _DashboardState extends State<Dashboard> {
                           } else {
                             imagePath = 'assets/worsening.png';
                           }
-                          return Image(
-                            image: AssetImage(imagePath),
-                            height: 350,
-                            width: 350,
+                          return Container(
+                            decoration: BoxDecoration(
+                                color: Colors.blueGrey,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
+                                border:
+                                    Border.all(width: 1, color: Colors.black)),
+                            child: Image(
+                              image: AssetImage(imagePath),
+                              height: 350,
+                              width: 350,
+                            ),
                           );
                         } else {
                           return const Center(
@@ -433,8 +441,8 @@ class _DashboardState extends State<Dashboard> {
     List<Map<String, dynamic>> selectedDeviceLogs =
         logs.where((log) => log['Ip'] == selectedDeviceIp).toList();
     num totalLogs = selectedDeviceLogs.length;
-    final num unhealthyThreshold = (totalLogs * 0.1);
-    final num stableThreshold = (totalLogs * 0.05);
+    final num unhealthyThreshold = (totalLogs * 0.9);
+    final num stableThreshold = (totalLogs * 0.005);
 
     num totalWeight = 0;
     for (final log in selectedDeviceLogs) {
@@ -442,7 +450,6 @@ class _DashboardState extends State<Dashboard> {
       final weight = weights[severity];
       totalWeight += weight!;
     }
-
     if (totalLogs == 0) {
       return 'Unknown';
     } else {
@@ -471,7 +478,7 @@ class TextBox extends StatelessWidget {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             color: Colors.blueGrey,
-            border: Border.all(width: 2, color: Colors.pink)),
+            border: Border.all(width: 2, color: Colors.black)),
         child: Column(
           children: <Widget>[
             const SizedBox(

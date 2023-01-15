@@ -16,7 +16,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   int _currIndex = 0;
   List<Widget> screens = [
     Dashboard(title: 'Dashboard'),
-    SearchPage(title: 'Search'),
+    SearchPage(title: 'Search Logs'),
     ChartsPage(title: 'Charts'),
     NodesPage(title: 'Devices'),
   ];
@@ -41,7 +41,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
                 label: 'Charts',
                 backgroundColor: Colors.blue),
             BottomNavigationBarItem(
-                icon: Icon(Icons.data_object_sharp),
+                icon: Icon(Icons.account_tree),
                 label: 'Devices',
                 backgroundColor: Colors.blue),
           ],
