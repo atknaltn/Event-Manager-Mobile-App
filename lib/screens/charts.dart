@@ -14,7 +14,7 @@ class ChartsPage extends StatefulWidget {
 }
 
 class _ChartsPageState extends State<ChartsPage> {
-  String dropdownValue = 'Zabbix server';
+  String dropdownValue = '101.169.213';
   Map<String, double> dataMap = {
     'Unknown': 0,
     'Normal': 0,
@@ -61,7 +61,7 @@ class _ChartsPageState extends State<ChartsPage> {
                           items: snapshot.data!.map((document) {
                             //print("sa : " + document['NodeName'].toString());
                             return DropdownMenuItem<String>(
-                              value: document['NodeName'],
+                              value: document['IP'],
                               child: Text(document['NodeName']),
                             );
                           }).toList(),
@@ -100,11 +100,11 @@ class _ChartsPageState extends State<ChartsPage> {
                                 .severity
                                 .toString();
                             if (dropdownValue ==
-                                LogModel.fromJson(snapshot.data[i]).node) {
+                                LogModel.fromJson(snapshot.data[i]).ip) {
                               print("dropdown: " +
                                   dropdownValue +
                                   "logmodel: " +
-                                  LogModel.fromJson(snapshot.data[i]).node);
+                                  LogModel.fromJson(snapshot.data[i]).ip);
                               dataMap.update(
                                   temp, (value) => dataMap[temp]! + 1);
                             }
@@ -148,7 +148,7 @@ class _ChartsPageState extends State<ChartsPage> {
                                   .severity
                                   .toString();
                               if (dropdownValue ==
-                                  LogModel.fromJson(snapshot.data[i]).node) {
+                                  LogModel.fromJson(snapshot.data[i]).ip) {
                                 dataMap.update(
                                     temp, (value) => dataMap[temp]! + 1);
                               }

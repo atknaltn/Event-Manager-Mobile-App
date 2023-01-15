@@ -25,15 +25,9 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  String dropdownValue = 'Zabbix server';
+  String dropdownValue = '101.169.213';
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -69,9 +63,8 @@ class _DashboardState extends State<Dashboard> {
                           });
                         },
                         items: snapshot.data!.map((document) {
-                          //print("sa : " + document['NodeName'].toString());
                           return DropdownMenuItem<String>(
-                            value: document['NodeName'],
+                            value: document['IP'],
                             child: Text(document['NodeName']),
                           );
                         }).toList(),
@@ -103,25 +96,74 @@ class _DashboardState extends State<Dashboard> {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Image(
-                      image: AssetImage('assets/healthy.png'),
-                      height: 350,
-                      width: 350,
+                    FutureBuilder(
+                      future: getDeviceHealth(dropdownValue),
+                      builder: (context, AsyncSnapshot<String> snapshot) {
+                        if (snapshot.hasData) {
+                          final healthCondition = snapshot.data!;
+                          String imagePath;
+                          if (healthCondition == "Healthy") {
+                            imagePath = 'assets/healthy.png';
+                          } else if (healthCondition == "Stable") {
+                            imagePath = 'assets/stable.png';
+                          } else {
+                            imagePath = 'assets/worsening.png';
+                          }
+                          return Image(
+                            image: AssetImage(imagePath),
+                            height: 350,
+                            width: 350,
+                          );
+                        } else {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                      },
                     ),
                     SizedBox(height: 10),
-                    const Text(
-                      'My Text',
-                      style: TextStyle(fontSize: 24),
+                    FutureBuilder(
+                      future: getDeviceHealth(dropdownValue),
+                      builder: (context, AsyncSnapshot<String> snapshot) {
+                        if (snapshot.hasData) {
+                          final healthCondition = snapshot.data!;
+                          return Text(healthCondition,
+                              style: TextStyle(fontSize: 24));
+                        } else {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                      },
                     ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextBox('Connected Device',
-                            widget.connectedDevicesList?.length.toString()),
+                        FutureBuilder(
+                          future: getConnectedDeviceCount(),
+                          builder: (context, AsyncSnapshot<String> snapshot) {
+                            if (snapshot.hasData) {
+                              final connectedDeviceCount = snapshot.data!;
+                              return TextBox(
+                                  "Connected Device: ", connectedDeviceCount);
+                            } else {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          },
+                        ),
                         SizedBox(width: 35),
-                        TextBox('Logs Analyzed',
-                            CalculateAnalyzedLogs().toString()),
+                        FutureBuilder(
+                          future: calculateAnalyzedLogs(),
+                          builder: (context, AsyncSnapshot<String> snapshot) {
+                            if (snapshot.hasData) {
+                              final analyzedLogs = snapshot.data!;
+                              return TextBox("Logs Analyzed: ", analyzedLogs);
+                            } else {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          },
+                        ),
                         SizedBox(width: 10),
                       ],
                     ),
@@ -161,7 +203,19 @@ class _DashboardState extends State<Dashboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextBox('Most Critical Node', "box 4"),
+                        FutureBuilder(
+                          future: getMostCriticalNodeForMostCriticalDevice(),
+                          builder: (context, AsyncSnapshot<String> snapshot) {
+                            if (snapshot.hasData) {
+                              final criticalNode = snapshot.data!;
+                              return TextBox(
+                                  'Most Critical Node', criticalNode);
+                            } else {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+                          },
+                        ),
                         SizedBox(width: 35),
                         FutureBuilder(
                           future: getMostCommonSourceForMostCommonAlert(),
@@ -193,28 +247,31 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  int CalculateAnalyzedLogs() {
+  Future<String> getConnectedDeviceCount() async {
+    final connectedDevices = await MongoDatabase.getNodeData();
+    final connectedDevicesList = connectedDevices.map((d) => d['IP']).toList();
+    var count = connectedDevicesList.length.toString();
+    return count;
+  }
+
+  Future<String> calculateAnalyzedLogs() async {
     int count = 0;
-    // print("Loglistt " + widget.logsList!.length.toString());
-    for (var i = 0; i < widget.logsList!.length; i++) {
-      for (var j = 0; j < widget.connectedDevicesList!.length; j++) {
-        //print("saa: " + widget.logsList!.elementAt(i)['Node']);
-        // print("ass: " + widget.connectedDevicesList!.elementAt(j)['NodeName']);
-        if (widget.logsList!.elementAt(i)['Node'] ==
-            widget.connectedDevicesList!.elementAt(j)['NodeName']) {
-          count++;
-        }
+    final logs = await MongoDatabase.getLogData();
+    final connectedDevices = await MongoDatabase.getNodeData();
+    final connectedDevicesList = connectedDevices.map((d) => d['IP']).toList();
+
+    for (final log in logs) {
+      if (connectedDevicesList.contains(log["Ip"])) {
+        count = count + 1;
       }
     }
-    print("count" + count.toString());
-    return count;
+    var analyzedLogs = count.toString();
+    return analyzedLogs;
   }
 
   Future<String> getMostCriticalDevice() async {
     final logs = await MongoDatabase.getLogData();
     final connectedDevices = await MongoDatabase.getNodeData();
-    final connectedDevicesList =
-        connectedDevices.map((d) => d['NodeName']).toList();
     final counts = Map<String, int>();
     final weights = {
       'Critical': 5,
@@ -226,21 +283,25 @@ class _DashboardState extends State<Dashboard> {
     };
 
     for (final log in logs) {
-      if (connectedDevicesList.contains(log["Node"])) {
-        final node = log["Node"];
-        final severity = log["Severity"];
-        final weight = weights[severity];
-        counts[node] =
-            (counts.containsKey(node) ? counts[node]! + weight! : weight)!;
+      final ip = log["Ip"];
+      final severity = log["Severity"];
+      final weight = weights[severity];
+      final connectedDevice =
+          connectedDevices.firstWhere((d) => d["IP"] == ip, orElse: () => {});
+      if (connectedDevice.isNotEmpty) {
+        final deviceName = connectedDevice["NodeName"];
+        counts[deviceName] = (counts.containsKey(deviceName)
+            ? counts[deviceName]! + weight!
+            : weight)!;
       }
     }
 
     var mostCriticalDevice = "";
     var maxScore = 0;
-    for (final node in counts.keys) {
-      if (counts[node]! > maxScore) {
-        maxScore = counts[node]!;
-        mostCriticalDevice = node;
+    for (final deviceName in counts.keys) {
+      if (counts[deviceName]! > maxScore) {
+        maxScore = counts[deviceName]!;
+        mostCriticalDevice = deviceName;
       }
     }
 
@@ -250,12 +311,11 @@ class _DashboardState extends State<Dashboard> {
   Future<String> getMostCommonAlert() async {
     final logs = await MongoDatabase.getLogData();
     final connectedDevices = await MongoDatabase.getNodeData();
-    final connectedDevicesList =
-        connectedDevices.map((d) => d['NodeName']).toList();
+    final connectedDevicesList = connectedDevices.map((d) => d['IP']).toList();
     final counts = Map<String, int>();
 
     for (final log in logs) {
-      if (connectedDevicesList.contains(log["Node"])) {
+      if (connectedDevicesList.contains(log["Ip"])) {
         final alertName = log["AlertName"];
         counts[alertName] =
             counts.containsKey(alertName) ? counts[alertName]! + 1 : 1;
@@ -277,12 +337,11 @@ class _DashboardState extends State<Dashboard> {
   Future<String> getMostCommonSourceForMostCommonAlert() async {
     final logs = await MongoDatabase.getLogData();
     final connectedDevices = await MongoDatabase.getNodeData();
-    final connectedDevicesList =
-        connectedDevices.map((d) => d['NodeName']).toList();
+    final connectedDevicesList = connectedDevices.map((d) => d['IP']).toList();
     final counts = Map<String, Map<String, int>>();
 
     for (final log in logs) {
-      if (connectedDevicesList.contains(log["Node"])) {
+      if (connectedDevicesList.contains(log["Ip"])) {
         final alertName = log["AlertName"];
         final source = log["Source"];
 
@@ -314,6 +373,87 @@ class _DashboardState extends State<Dashboard> {
       }
     }
     return mostCommonSource;
+  }
+
+  Future<String> getMostCriticalNodeForMostCriticalDevice() async {
+    final logs = await MongoDatabase.getLogData();
+    final connectedDevices = await MongoDatabase.getNodeData();
+    final connectedDevicesIp = connectedDevices.map((d) => d['IP']).toList();
+    final counts = Map<String, int>();
+    final weights = {
+      'Critical': 5,
+      'Major': 4,
+      'Warning': 3,
+      'Minor': 2,
+      'Normal': 1,
+      'Unknown': 0
+    };
+
+    for (final log in logs) {
+      final severity = log["Severity"];
+      final weight = weights[severity];
+      final node = log["Node"];
+      final ip = log["Ip"];
+      counts[ip] = (counts.containsKey(ip) ? counts[ip]! + weight! : weight)!;
+    }
+
+    var mostCriticalDeviceIp = "";
+    var maxScore = 0;
+    for (final ip in counts.keys) {
+      if (counts[ip]! > maxScore && connectedDevicesIp.contains(ip)) {
+        maxScore = counts[ip]!;
+        mostCriticalDeviceIp = ip;
+      }
+    }
+    final filteredLogs = logs.where((log) => log["Ip"] == mostCriticalDeviceIp);
+    final nodeCounts = Map<String, int>();
+    for (final log in filteredLogs) {
+      final node = log["Node"];
+      nodeCounts[node] =
+          nodeCounts.containsKey(node) ? nodeCounts[node]! + 1 : 1;
+    }
+
+    var mostCriticalNode = "";
+    var maxCount = 0;
+    for (final node in nodeCounts.keys) {
+      if (nodeCounts[node]! > maxCount) {
+        maxCount = nodeCounts[node]!;
+        mostCriticalNode = node;
+      }
+    }
+    return mostCriticalNode;
+  }
+
+  Future<String> getDeviceHealth(String selectedDeviceIp) async {
+    final weights = {
+      'Critical': 5,
+      'Major': 4,
+      'Warning': 3,
+      'Minor': 2,
+      'Normal': 0,
+      'Unknown': 0
+    };
+    final logs = await MongoDatabase.getLogData();
+    List<Map<String, dynamic>> selectedDeviceLogs =
+        logs.where((log) => log['Ip'] == selectedDeviceIp).toList();
+    num totalLogs = selectedDeviceLogs.length;
+    final num unhealthyThreshold = (totalLogs * 0.1);
+    final num stableThreshold = (totalLogs * 0.05);
+
+    num totalWeight = 0;
+    for (final log in selectedDeviceLogs) {
+      final severity = log["Severity"];
+      final weight = weights[severity];
+      totalWeight += weight!;
+    }
+
+    if (totalWeight >= unhealthyThreshold) {
+      return 'Unhealthy';
+    } else if (totalWeight > stableThreshold) {
+      return 'Stable';
+    } else {
+      return 'Healthy';
+    }
   }
 }
 
