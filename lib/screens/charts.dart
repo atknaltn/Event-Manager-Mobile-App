@@ -1,8 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:pie_chart/pie_chart.dart';
+//import 'package:pie_chart/pie_chart.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_charts/flutter_charts.dart';
+import 'package:pie_chart/pie_chart.dart' as pie;
+//import 'package:bar_chart/bar_chart.dart';
 import 'dbHelper/LogModel.dart';
 import 'dbHelper/mongodb.dart';
 
@@ -17,16 +21,10 @@ class ChartsPage extends StatefulWidget {
 
 class _ChartsPageState extends State<ChartsPage> {
   String selectedNodePie = "";
+  String selectedNodeBar = "";
   String dropdownValue = '101.169.213';
   bool isDeviceChanged = false;
-  Map<String, double> dataMap = {
-    'Unknown': 0,
-    'Normal': 0,
-    'Warning': 0,
-    'Minor': 0,
-    'Major': 0,
-    'Critical': 0,
-  };
+  Map<String, double> dataMap = {};
   List<String> list = <String>[
     'Select a Source',
     'Severity',
@@ -35,6 +33,7 @@ class _ChartsPageState extends State<ChartsPage> {
     'Subcategory'
   ];
   String selectedSourcePie = 'Select a Source';
+  String selectedSourceBar = 'Select a Source';
   List<ChartData> chartData = [];
 
   @override
@@ -70,7 +69,9 @@ class _ChartsPageState extends State<ChartsPage> {
                             dropdownValue = newValue!;
                             isDeviceChanged = true;
                             selectedNodePie = "Select a Node";
+                            selectedNodeBar = "Select a Node";
                             selectedSourcePie = 'Select a Source';
+                            selectedSourceBar = 'Select a Source';
                           });
                         },
                         items: snapshot.data!.map((document) {
@@ -98,6 +99,16 @@ class _ChartsPageState extends State<ChartsPage> {
               children: <Widget>[
                 Column(
                   children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      child: Text("Pie Chart",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.italic)),
+                    ),
+                    //-----------------------------------------------PIE CHART----------------------------------------------------------
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -177,15 +188,16 @@ class _ChartsPageState extends State<ChartsPage> {
                                 " selectedNodePie: " +
                                 selectedNodePie);
                             if (snapshot.hasData) {
-                              return PieChart(
+                              return pie.PieChart(
                                 dataMap: snapshot.data,
                                 chartRadius:
                                     MediaQuery.of(context).size.width / 1.7,
-                                legendOptions: const LegendOptions(
-                                    legendPosition: LegendPosition.bottom,
+                                legendOptions: const pie.LegendOptions(
+                                    legendPosition: pie.LegendPosition.bottom,
                                     showLegendsInRow: true),
-                                chartValuesOptions: const ChartValuesOptions(
-                                    showChartValuesInPercentage: true),
+                                chartValuesOptions:
+                                    const pie.ChartValuesOptions(
+                                        showChartValuesInPercentage: true),
                               );
                             } else {
                               return const Center(
@@ -198,91 +210,133 @@ class _ChartsPageState extends State<ChartsPage> {
                     ),
                   ],
                 ),
+                //-----------------------------------------------BAR CHART----------------------------------------------------------
                 Container(
-                    height: 300,
-                    child: FutureBuilder(
-                      future: MongoDatabase.getLogData(),
-                      builder: (context, AsyncSnapshot snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return (const Center(
-                            child: CircularProgressIndicator(),
-                          ));
-                        } else {
-                          if (snapshot.hasData) {
-                            var totalData = snapshot.data.length;
-                            print("Total Data: " + totalData.toString());
-                            dataMap.forEach((key, value) => dataMap[key] = 0);
-                            for (var i = 0; i < totalData; i++) {
-                              var temp = LogModel.fromJson(snapshot.data[i])
-                                  .severity
-                                  .toString();
-                              if (dropdownValue ==
-                                  LogModel.fromJson(snapshot.data[i]).ip) {
-                                dataMap.update(
-                                    temp, (value) => dataMap[temp]! + 1);
-                              }
-                            }
-                            dataMap.forEach((key, value) => chartData
-                                .add(ChartData(value: value, severity: key)));
-                            return charts.BarChart(
-                              [
-                                charts.Series<ChartData, String>(
-                                  id: 'severity',
-                                  colorFn: (ChartData data, _) {
-                                    if (data.severity == "Normal") {
-                                      return charts
-                                          .MaterialPalette.green.shadeDefault;
-                                    } else if (data.severity == "Minor") {
-                                      return charts
-                                          .MaterialPalette.yellow.shadeDefault;
-                                    } else if (data.severity == "Major") {
-                                      return charts.MaterialPalette.deepOrange
-                                          .shadeDefault;
-                                    } else if (data.severity == 'Critical') {
-                                      return charts
-                                          .MaterialPalette.red.shadeDefault;
-                                    } else if (data.severity == 'Waring') {
-                                      return charts
-                                          .MaterialPalette.teal.shadeDefault;
-                                    } else {
-                                      return charts
-                                          .MaterialPalette.purple.shadeDefault;
-                                    }
-                                  },
-                                  domainFn: (ChartData data, _) =>
-                                      data.severity,
-                                  measureFn: (ChartData data, _) => data.value,
-                                  data: chartData,
-                                ),
-                              ],
-                              animate: true,
-                              barGroupingType: charts.BarGroupingType.grouped,
-                              behaviors: [],
-                              primaryMeasureAxis: const charts.NumericAxisSpec(
-                                  renderSpec: charts.SmallTickRendererSpec(
-                                      labelStyle: charts.TextStyleSpec(),
-                                      lineStyle: charts.LineStyleSpec()),
-                                  showAxisLine: true),
-                              domainAxis: const charts.OrdinalAxisSpec(
-                                renderSpec: charts.SmallTickRendererSpec(
-                                    labelRotation: 45,
-                                    labelStyle: charts.TextStyleSpec(),
-                                    lineStyle: charts.LineStyleSpec()),
-                                showAxisLine: true,
-                              ),
-                            );
-                          } else {
-                            return const Center(
-                              child: Text("No Data Avaliable"),
-                            );
+                  padding: EdgeInsets.all(20),
+                  child: Text("Bar Chart",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.italic)),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Text(
+                      "Node: ",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    FutureBuilder(
+                      future: getNodesForSelectedIp(dropdownValue),
+                      builder: (context, AsyncSnapshot<List<String>> snapshot) {
+                        if (snapshot.hasData) {
+                          if (isDeviceChanged && snapshot.data!.isNotEmpty) {
+                            selectedNodeBar = snapshot.data!.first;
                           }
+
+                          return DropdownButton<String>(
+                            value: selectedNodeBar,
+                            hint: Text("Select a node"),
+                            items: snapshot.data!
+                                .map((node) => DropdownMenuItem<String>(
+                                      value: node,
+                                      child: Text(node),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedNodeBar = value!;
+                                isDeviceChanged = false;
+                              });
+                            },
+                          );
+                        } else {
+                          return CircularProgressIndicator();
                         }
                       },
-                    )),
+                    ),
+                    const Text(
+                      "Source: ",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    DropdownButton<String>(
+                      value: selectedSourceBar,
+                      hint: Text("Select a Source"),
+                      items: list
+                          .map((node) => DropdownMenuItem<String>(
+                                value: node,
+                                child: Text(node),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedSourceBar = value!;
+                          isDeviceChanged = false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
                 Container(
-                  height: 200,
-                  child: Text("Vay aq"),
+                  height: 300,
+                  child: FutureBuilder(
+                    future: getCountsForSelectedIpAndNode(
+                        dropdownValue, selectedNodeBar, selectedSourceBar),
+                    builder: (context,
+                        AsyncSnapshot<Map<String, double>?> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return (const Center(
+                          child: CircularProgressIndicator(),
+                        ));
+                      } else {
+                        if (snapshot.hasData) {
+                          chartData.clear();
+                          snapshot.data!.forEach((key, value) => chartData
+                              .add(ChartData(value: value, source: key)));
+
+                          return charts.BarChart(
+                            [
+                              charts.Series<ChartData, String>(
+                                id: 'severity',
+                                colorFn: (ChartData data, _) {
+                                  return charts
+                                      .MaterialPalette.yellow.shadeDefault;
+                                },
+                                domainFn: (ChartData data, _) => data.source,
+                                measureFn: (ChartData data, _) => data.value,
+                                data: chartData,
+                              ),
+                            ],
+                            animate: true,
+                            barGroupingType: charts.BarGroupingType.grouped,
+                            behaviors: [],
+                            primaryMeasureAxis: const charts.NumericAxisSpec(
+                                renderSpec: charts.SmallTickRendererSpec(
+                                    labelStyle: charts.TextStyleSpec(),
+                                    lineStyle: charts.LineStyleSpec()),
+                                showAxisLine: true),
+                            domainAxis: const charts.OrdinalAxisSpec(
+                              renderSpec: charts.SmallTickRendererSpec(
+                                  labelRotation: 45,
+                                  labelStyle: charts.TextStyleSpec(),
+                                  lineStyle: charts.LineStyleSpec()),
+                              showAxisLine: true,
+                            ),
+                          );
+                        } else {
+                          return const Center(
+                            child: Text("No Data Avaliable"),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+                Container(
+                  height: 50,
                 )
               ],
             )
@@ -386,59 +440,17 @@ class _ChartsPageState extends State<ChartsPage> {
       print(nodes.first);
     }
 
+    if (nodes.isNotEmpty && selectedNodeBar == "") {
+      selectedNodeBar = nodes.first;
+      print(nodes.first);
+    }
     return nodes.toList();
-  }
-
-  Future<Map<String, double>> getSeverityCountsForSelectedIpAndNode(
-      String selectedIp, String selectedNodePie) async {
-    final logs = await MongoDatabase.getLogData();
-    final Map<String, double> counts = {
-      'Critical': 0,
-      'Major': 0,
-      'Warning': 0,
-      'Minor': 0,
-      'Normal': 0,
-      'Unknown': 0
-    };
-
-    for (final log in logs) {
-      final severity = log["Severity"];
-      final ip = log["Ip"];
-      final node = log["Node"];
-      if (ip == selectedIp && node == selectedNodePie) {
-        counts[severity] = (counts[severity]! + 1);
-      }
-    }
-
-    return counts;
-  }
-
-  Future<Map<String, double>> getStatusCountsForSelectedIpAndNode(
-      String selectedIp, String selectedNodePie) async {
-    final logs = await MongoDatabase.getLogData();
-    final Map<String, double> counts = {
-      'Open': 0,
-      'Close': 0,
-      'PROBLEM': 0,
-      'OK': 0
-    };
-
-    for (final log in logs) {
-      final status = log["Status"];
-      final ip = log["Ip"];
-      final node = log["Node"];
-      if (ip == selectedIp && node == selectedNodePie) {
-        counts[status] = (counts[status]! + 1);
-      }
-    }
-
-    return counts;
   }
 }
 
 class ChartData {
   final num value;
-  final String severity;
+  final String source;
 
-  ChartData({required this.value, required this.severity});
+  ChartData({required this.value, required this.source});
 }

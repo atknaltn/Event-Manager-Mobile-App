@@ -19,7 +19,6 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     SearchPage(title: 'Search'),
     ChartsPage(title: 'Charts'),
     NodesPage(title: 'Devices'),
-    CorrelationRuleScreen()
   ];
   @override
   Widget build(BuildContext context) {
@@ -44,10 +43,6 @@ class _BottomNavigatorState extends State<BottomNavigator> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.data_object_sharp),
                 label: 'Devices',
-                backgroundColor: Colors.blue),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Correlation',
                 backgroundColor: Colors.blue),
           ],
           onTap: (index) {

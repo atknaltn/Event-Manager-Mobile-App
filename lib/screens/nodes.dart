@@ -179,49 +179,152 @@ class _NodesPageState extends State<NodesPage> {
   }
 
   Widget displayCard(NodeModel data) {
-    return ExpansionTile(
-        title: Text(data.nodeName),
-        trailing: const Image(image: AssetImage('assets/shield_healthy.png')),
-        //leading: const Icon(Icons.keyboard_arrow_right_outlined),
-        controlAffinity: ListTileControlAffinity.leading,
-        collapsedIconColor: Colors.red,
-        children: [
-          Card(
-              child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
+    return FutureBuilder(
+      future: getDeviceHealth(data.ip),
+      builder: (context, AsyncSnapshot<String> snapshot) {
+        if (snapshot.hasData) {
+          final healthCondition = snapshot.data!;
+          String imagePath;
+          if (healthCondition == "Healthy") {
+            imagePath = 'assets/shield_healthy.png';
+          } else if (healthCondition == "Stable") {
+            imagePath = 'assets/shield_stable.png';
+          } else if (healthCondition == "Unknown") {
+            imagePath = 'assets/shield_unknown.png';
+          } else {
+            imagePath = 'assets/shield_worsening.png';
+          }
+          return ExpansionTile(
+              title: Text(data.nodeName),
+              trailing: Image(image: AssetImage(imagePath)),
+              //leading: const Icon(Icons.keyboard_arrow_right_outlined),
+              controlAffinity: ListTileControlAffinity.leading,
+              collapsedIconColor: Colors.red,
               children: [
-                Text("${data.nodeId}"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text("${data.nodeName}"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text("${data.ip}"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text("${data.dns}"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text("${data.macAddress}"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text("${data.category}"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text("${data.subcategory}"),
-                const SizedBox(
-                  height: 5,
-                ),
-              ],
-            ),
-          )),
-        ]);
+                Card(
+                    child: Row(
+                  children: <Widget>[
+                    IconButton(
+                        onPressed: () {}, icon: Icon(Icons.delete_forever)),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 10, 0, 10),
+                      child: Column(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              style: DefaultTextStyle.of(context).style,
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: 'Device Name: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: data.nodeName,
+                                  //style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                                TextSpan(
+                                  text: '\n',
+                                ),
+                                TextSpan(
+                                    text: 'Device Ip: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: data.ip,
+                                  //style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                                TextSpan(
+                                  text: '\n',
+                                ),
+                                TextSpan(
+                                    text: 'DNS: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: data.dns,
+                                  //style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                                TextSpan(
+                                  text: '\n',
+                                ),
+                                TextSpan(
+                                    text: 'MAC: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: data.macAddress,
+                                  //style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                                TextSpan(
+                                  text: '\n',
+                                ),
+                                TextSpan(
+                                    text: 'Category: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: data.category,
+                                  //style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                                TextSpan(
+                                  text: '\n',
+                                ),
+                                TextSpan(
+                                    text: 'Subcategory: ',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(
+                                  text: data.subcategory,
+                                  //style: TextStyle(fontWeight: FontWeight.bold)
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )),
+              ]);
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  Future<String> getDeviceHealth(String selectedDeviceIp) async {
+    final weights = {
+      'Critical': 5,
+      'Major': 4,
+      'Warning': 3,
+      'Minor': 2,
+      'Normal': 0,
+      'Unknown': 0
+    };
+    final logs = await MongoDatabase.getLogData();
+    List<Map<String, dynamic>> selectedDeviceLogs =
+        logs.where((log) => log['Ip'] == selectedDeviceIp).toList();
+    num totalLogs = selectedDeviceLogs.length;
+    print("SAAAAAAAAA" + totalLogs.toString());
+    final num unhealthyThreshold = (totalLogs * 0.1);
+    final num stableThreshold = (totalLogs * 0.05);
+    num totalWeight = 0;
+    for (final log in selectedDeviceLogs) {
+      final severity = log["Severity"];
+      final weight = weights[severity];
+      totalWeight += weight!;
+    }
+    if (totalLogs == 0) {
+      return 'Unknown';
+    } else {
+      if (totalWeight >= unhealthyThreshold) {
+        return 'Unhealthy';
+      } else if (totalWeight > stableThreshold) {
+        return 'Stable';
+      } else {
+        return 'Healthy';
+      }
+    }
   }
 }

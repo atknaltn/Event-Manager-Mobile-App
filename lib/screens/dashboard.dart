@@ -28,7 +28,10 @@ class _DashboardState extends State<Dashboard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text('Select Device: '),
+                const Text(
+                  'Select Device: ',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(width: 8),
                 FutureBuilder(
                   future: MongoDatabase.getNodeData(),
@@ -38,16 +41,14 @@ class _DashboardState extends State<Dashboard> {
                       widget.connectedDevicesList = snapshot.data;
                       return DropdownButton<String>(
                         value: dropdownValue,
-                        icon: const Icon(Icons.arrow_downward),
+                        iconEnabledColor: Colors.white,
                         iconSize: 24,
                         elevation: 16,
                         style: const TextStyle(
-                            color: Colors.deepPurple,
-                            fontWeight: FontWeight.bold),
-                        underline: Container(
-                          height: 2,
-                          color: Colors.white70,
-                        ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
+                        dropdownColor: Colors.blueGrey,
                         onChanged: (String? newValue) {
                           setState(() {
                             dropdownValue = newValue!;
@@ -97,6 +98,8 @@ class _DashboardState extends State<Dashboard> {
                             imagePath = 'assets/healthy.png';
                           } else if (healthCondition == "Stable") {
                             imagePath = 'assets/stable.png';
+                          } else if (healthCondition == "Unknown") {
+                            imagePath = 'assets/unknown.png';
                           } else {
                             imagePath = 'assets/worsening.png';
                           }
@@ -117,8 +120,9 @@ class _DashboardState extends State<Dashboard> {
                       builder: (context, AsyncSnapshot<String> snapshot) {
                         if (snapshot.hasData) {
                           final healthCondition = snapshot.data!;
-                          return Text(healthCondition,
-                              style: const TextStyle(fontSize: 24));
+                          return Text('Device Status: $healthCondition',
+                              style: const TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold));
                         } else {
                           return const Center(
                               child: CircularProgressIndicator());
@@ -135,7 +139,7 @@ class _DashboardState extends State<Dashboard> {
                             if (snapshot.hasData) {
                               final connectedDeviceCount = snapshot.data!;
                               return TextBox(
-                                  "Connected Device: ", connectedDeviceCount);
+                                  "Connected Device ", connectedDeviceCount);
                             } else {
                               return const Center(
                                   child: CircularProgressIndicator());
@@ -148,7 +152,8 @@ class _DashboardState extends State<Dashboard> {
                           builder: (context, AsyncSnapshot<String> snapshot) {
                             if (snapshot.hasData) {
                               final analyzedLogs = snapshot.data!;
-                              return TextBox("Logs Analyzed: ", analyzedLogs);
+                              return TextBox(
+                                  "Number of Analyzed Logs ", analyzedLogs);
                             } else {
                               return const Center(
                                   child: CircularProgressIndicator());
@@ -167,7 +172,7 @@ class _DashboardState extends State<Dashboard> {
                           builder: (context, AsyncSnapshot<String> snapshot) {
                             if (snapshot.hasData) {
                               final node = snapshot.data!;
-                              return TextBox("Most critical device: ", node);
+                              return TextBox("Most critical device ", node);
                             } else {
                               return const Center(
                                   child: CircularProgressIndicator());
@@ -438,12 +443,16 @@ class _DashboardState extends State<Dashboard> {
       totalWeight += weight!;
     }
 
-    if (totalWeight >= unhealthyThreshold) {
-      return 'Unhealthy';
-    } else if (totalWeight > stableThreshold) {
-      return 'Stable';
+    if (totalLogs == 0) {
+      return 'Unknown';
     } else {
-      return 'Healthy';
+      if (totalWeight >= unhealthyThreshold) {
+        return 'Unhealthy';
+      } else if (totalWeight > stableThreshold) {
+        return 'Stable';
+      } else {
+        return 'Healthy';
+      }
     }
   }
 }
@@ -460,7 +469,9 @@ class TextBox extends StatelessWidget {
         width: 150,
         height: 150,
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10), color: Colors.blueGrey),
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.blueGrey,
+            border: Border.all(width: 2, color: Colors.pink)),
         child: Column(
           children: <Widget>[
             const SizedBox(
@@ -474,6 +485,7 @@ class TextBox extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(title!,
+                      textAlign: TextAlign.left,
                       style: const TextStyle(
                           fontSize: 18, color: Colors.amberAccent),
                       softWrap: true),
@@ -483,13 +495,16 @@ class TextBox extends StatelessWidget {
             const SizedBox(
               height: 30,
             ),
-            Text(
-              value!,
-              style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.amber),
-              softWrap: true,
+            Expanded(
+              child: Text(
+                value!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber),
+                softWrap: true,
+              ),
             ),
           ],
         ));
