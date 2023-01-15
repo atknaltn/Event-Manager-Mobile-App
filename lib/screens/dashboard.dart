@@ -7,15 +7,6 @@ import 'dbHelper/mongodb.dart';
 class Dashboard extends StatefulWidget {
   Dashboard({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
   List<Map<String, dynamic>>? connectedDevicesList;
   List<Map<String, dynamic>>? logsList;
@@ -37,8 +28,8 @@ class _DashboardState extends State<Dashboard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text('Select Device: '),
-                SizedBox(width: 8),
+                const Text('Select Device: '),
+                const SizedBox(width: 8),
                 FutureBuilder(
                   future: MongoDatabase.getNodeData(),
                   builder: (BuildContext context,
@@ -120,21 +111,21 @@ class _DashboardState extends State<Dashboard> {
                         }
                       },
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     FutureBuilder(
                       future: getDeviceHealth(dropdownValue),
                       builder: (context, AsyncSnapshot<String> snapshot) {
                         if (snapshot.hasData) {
                           final healthCondition = snapshot.data!;
                           return Text(healthCondition,
-                              style: TextStyle(fontSize: 24));
+                              style: const TextStyle(fontSize: 24));
                         } else {
                           return const Center(
                               child: CircularProgressIndicator());
                         }
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -151,7 +142,7 @@ class _DashboardState extends State<Dashboard> {
                             }
                           },
                         ),
-                        SizedBox(width: 35),
+                        const SizedBox(width: 35),
                         FutureBuilder(
                           future: calculateAnalyzedLogs(),
                           builder: (context, AsyncSnapshot<String> snapshot) {
@@ -164,10 +155,10 @@ class _DashboardState extends State<Dashboard> {
                             }
                           },
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    const SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -183,7 +174,7 @@ class _DashboardState extends State<Dashboard> {
                             }
                           },
                         ),
-                        SizedBox(width: 35),
+                        const SizedBox(width: 35),
                         FutureBuilder(
                           future: getMostCommonAlert(),
                           builder: (context, AsyncSnapshot<String> snapshot) {
@@ -196,10 +187,10 @@ class _DashboardState extends State<Dashboard> {
                             }
                           },
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    const SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -216,7 +207,7 @@ class _DashboardState extends State<Dashboard> {
                             }
                           },
                         ),
-                        SizedBox(width: 35),
+                        const SizedBox(width: 35),
                         FutureBuilder(
                           future: getMostCommonSourceForMostCommonAlert(),
                           builder: (context, AsyncSnapshot<String> snapshot) {
@@ -230,7 +221,7 @@ class _DashboardState extends State<Dashboard> {
                             }
                           },
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                       ],
                     ),
                   ],
@@ -472,28 +463,29 @@ class TextBox extends StatelessWidget {
             borderRadius: BorderRadius.circular(10), color: Colors.blueGrey),
         child: Column(
           children: <Widget>[
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
+                const SizedBox(
                   width: 15,
                 ),
                 Expanded(
                   child: Text(title!,
-                      style: TextStyle(fontSize: 18, color: Colors.amberAccent),
+                      style: const TextStyle(
+                          fontSize: 18, color: Colors.amberAccent),
                       softWrap: true),
                 )
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Text(
               value!,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.amber),
