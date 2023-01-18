@@ -24,6 +24,10 @@ class MongoDatabase {
     return nodeData;
   }
 
+  static delete(NodeModel data) async {
+    await nodesCollection.remove(where.id(data.id));
+  }
+
   static Future<String> insertNode(NodeModel data) async {
     try {
       var result = await nodesCollection.insertOne(data.toJson());

@@ -36,7 +36,7 @@ class _NodesPageState extends State<NodesPage> {
                 builder: (context) {
                   return AlertDialog(
                     scrollable: true,
-                    title: Text('Add a new Node'),
+                    title: Text('Add a New Device'),
                     content: Padding(
                       padding: const EdgeInsets.all(5.0),
                       child: Form(
@@ -205,7 +205,11 @@ class _NodesPageState extends State<NodesPage> {
                     child: Row(
                   children: <Widget>[
                     IconButton(
-                        onPressed: () {}, icon: Icon(Icons.delete_forever)),
+                        onPressed: () async {
+                          await MongoDatabase.delete(data);
+                          setState(() {});
+                        },
+                        icon: Icon(Icons.delete_forever)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 10, 0, 10),
                       child: Column(
