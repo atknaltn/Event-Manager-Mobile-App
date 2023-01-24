@@ -130,21 +130,25 @@ class _ChartsPageState extends State<ChartsPage> {
                                 selectedNodePie = snapshot.data!.first;
                               }
 
-                              return DropdownButton<String>(
-                                value: selectedNodePie,
-                                hint: Text("Select a node"),
-                                items: snapshot.data!
-                                    .map((node) => DropdownMenuItem<String>(
-                                          value: node,
-                                          child: Text(node),
-                                        ))
-                                    .toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedNodePie = value!;
-                                    isDeviceChanged = false;
-                                  });
-                                },
+                              return SizedBox(
+                                width: 125,
+                                child: DropdownButton<String>(
+                                  value: selectedNodePie,
+                                  isExpanded: true,
+                                  hint: Text("Select a node"),
+                                  items: snapshot.data!
+                                      .map((node) => DropdownMenuItem<String>(
+                                            value: node,
+                                            child: Text(node),
+                                          ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedNodePie = value!;
+                                      isDeviceChanged = false;
+                                    });
+                                  },
+                                ),
                               );
                             } else {
                               return CircularProgressIndicator();
@@ -239,21 +243,25 @@ class _ChartsPageState extends State<ChartsPage> {
                             selectedNodeBar = snapshot.data!.first;
                           }
 
-                          return DropdownButton<String>(
-                            value: selectedNodeBar,
-                            hint: Text("Select a node"),
-                            items: snapshot.data!
-                                .map((node) => DropdownMenuItem<String>(
-                                      value: node,
-                                      child: Text(node),
-                                    ))
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedNodeBar = value!;
-                                isDeviceChanged = false;
-                              });
-                            },
+                          return SizedBox(
+                            width: 125,
+                            child: DropdownButton<String>(
+                              value: selectedNodeBar,
+                              hint: Text("Select a node"),
+                              isExpanded: true,
+                              items: snapshot.data!
+                                  .map((node) => DropdownMenuItem<String>(
+                                        value: node,
+                                        child: Text(node),
+                                      ))
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedNodeBar = value!;
+                                  isDeviceChanged = false;
+                                });
+                              },
+                            ),
                           );
                         } else {
                           return CircularProgressIndicator();

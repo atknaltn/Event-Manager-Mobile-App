@@ -441,8 +441,8 @@ class _DashboardState extends State<Dashboard> {
     List<Map<String, dynamic>> selectedDeviceLogs =
         logs.where((log) => log['Ip'] == selectedDeviceIp).toList();
     num totalLogs = selectedDeviceLogs.length;
-    final num unhealthyThreshold = (totalLogs * 0.9);
-    final num stableThreshold = (totalLogs * 0.005);
+    final num unhealthyThreshold = (totalLogs * 3.4);
+    final num stableThreshold = (totalLogs * 2.8);
 
     num totalWeight = 0;
     for (final log in selectedDeviceLogs) {
@@ -450,6 +450,12 @@ class _DashboardState extends State<Dashboard> {
       final weight = weights[severity];
       totalWeight += weight!;
     }
+    print("Totalweight: " +
+        totalWeight.toString() +
+        " unhealthyThreshold: " +
+        unhealthyThreshold.toString() +
+        " stabletreshold: " +
+        stableThreshold.toString());
     if (totalLogs == 0) {
       return 'Unknown';
     } else {
